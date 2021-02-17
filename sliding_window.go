@@ -21,20 +21,20 @@ func NewSlidingWindow(opts LimiterOptions) *SlidingWindow {
 	}
 }
 
-func (s *SlidingWindow) NextTick() {
-	s.requestsLock.Lock()
-	defer s.requestsLock.Unlock()
+func (f *SlidingWindow) NextTick() {
+	f.requestsLock.Lock()
+	defer f.requestsLock.Unlock()
 
-	s.position++
+	f.position++
 
 	//new window position
-	if s.position >= s.ticksPerWindow {
-		s.prevWindowRequests = s.used
-		s.used = 0
-		s.position = 0
+	if f.position >= f.ticksPerWindow {
+		f.prevWindowRequests = f.used
+		f.used = 0
+		f.position = 0
 	}
 
 	//reserve some requests from limit based on prev window requests amount
-	s.total = s.Limiter.opts.Limit - s.prevWindowRequests*
-		int32(s.ticksPerWindow-s.position-1)/int32(s.ticksPerWindow)
+	f.total = f.Limiter.opts.Limit - f.prevWindowRequests*
+		int32(f.ticksPerWindow-f.position-1)/int32(f.ticksPerWindow)
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var _ = Describe("Sliding window with granularity", func() {
+var _ = Describe("Sliding window", func() {
 	opts := ratelimiter.LimiterOptions{
 		Limit:    5,
 		Interval: time.Millisecond * 5,
@@ -18,7 +18,7 @@ var _ = Describe("Sliding window with granularity", func() {
 		var limiter ratelimiter.RateLimiter
 
 		BeforeEach(func() {
-			limiter = ratelimiter.NewSlidingWindowWithGranularity(opts)
+			limiter = ratelimiter.NewFixedWindow(opts)
 		})
 
 		It("Get some, no tick advance", func() {
@@ -33,11 +33,11 @@ var _ = Describe("Sliding window with granularity", func() {
 				limiter.GetTokens(2)
 				limiter.NextTick()
 			}
-			Expect(limiter.GetTokens(10)).To(Equal(int32(2)))
+			Expect(limiter.GetTokens(10)).To(Equal(int32(5)))
 			limiter.NextTick()
-			Expect(limiter.GetTokens(10)).To(Equal(int32(2)))
+			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
 			limiter.NextTick()
-			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
+			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
 			limiter.NextTick()
 			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
 			limiter.NextTick()
@@ -52,21 +52,21 @@ var _ = Describe("Sliding window with granularity", func() {
 			limiter.GetTokens(10)
 			limiter.NextTick()
 
-			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
-			limiter.NextTick()
-			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
-			limiter.NextTick()
-			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
-			limiter.NextTick()
-			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
-			limiter.NextTick()
 			Expect(limiter.GetTokens(10)).To(Equal(int32(5)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(0)))
 		})
 	})
 
 	Describe("Sync test, for race condition checking", func() {
 		XIt("Race condition test, run with --race flag", func() {
-			limiter := ratelimiter.NewSlidingWindowWithGranularity(opts)
+			limiter := ratelimiter.NewSlidingWindow(opts)
 
 			for i := 0; i < 100000; i++ {
 				go func() {

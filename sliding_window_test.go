@@ -43,6 +43,25 @@ var _ = Describe("Sliding window", func() {
 			limiter.NextTick()
 			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
 		})
+
+		It("Get some from end of prev, then from start of next", func() {
+			limiter.NextTick()
+			limiter.NextTick()
+			limiter.NextTick()
+			limiter.NextTick()
+			limiter.GetTokens(10)
+			limiter.NextTick()
+
+			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
+			limiter.NextTick()
+			Expect(limiter.GetTokens(10)).To(Equal(int32(1)))
+		})
 	})
 
 	Describe("Sync test, for race condition checking", func() {
